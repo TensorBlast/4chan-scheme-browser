@@ -20,11 +20,34 @@
     (if (eq? (car current-page) 'page)
 	(if (eqv? (cdr current-page) pagenum)
 	    (cdadar ls)
-	    (get-page2 pagenum (cdr ls))
+	    (get-page pagenum (cdr ls))
 	    )
 	(error "WRONG FORMAT - CAN'T GET PAGE" ls)
 	)
     )
+  )
+
+(define (display-threadlist data board)
+  (if (null? data) (display " * END * ")
+      (let* ((id (get-inner-content 'no (car data))) (replies (get-inner-content 'replies (car data)))
+	     (thread-data (get-thread board (number->string id)))
+	     (thread-subject (get-inner-content 'sub (car thread-data))))
+	(begin
+	  (display "Thread ID: ")
+	  (display id)
+	  (newline)
+	  (display "Sub: ")
+	  (display thread-subject)
+	  (newline)
+	  (display "Replies: ")
+	  (display replies)
+	  (newline)
+	  (display "------------------------")
+	  (newline)
+	  (display-threadlist (cdr data) board)
+	  )
+	)
+      )
   )
 
 (define (thread-ids data)
@@ -50,14 +73,14 @@
   )
   
 
-(define-method (get-thread-endpoint thread)
-  "http://a.4cdn.org/b/thread"
+(define-method (get-thread-endpoint board "thread" thread)
+  "http://a.4cdn.org"
   #f
   read-json
   )
 
-(define (get-thread thread)
-  (cdar (get-thread-endpoint (conc thread ".json"))))
+(define (get-thread board thread)
+  (cdar (get-thread-endpoint board (conc thread ".json"))))
 
 
 (define (get-image-ids threaddata)
