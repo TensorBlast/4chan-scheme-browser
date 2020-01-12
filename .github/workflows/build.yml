@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Run the script
-      run: 
+    - run: 
         |
         echo Hello, world! New version pushed! 
         csi chicken-browser.ss
