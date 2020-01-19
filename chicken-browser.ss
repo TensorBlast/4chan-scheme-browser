@@ -47,7 +47,7 @@
 	  (display "Sub: ")
 	  (if (not (null? thread-subject))
 	      (display thread-subject)
-	      (display thread-comment))
+	      (display (clean thread-comment)))
 	  (newline)
 	  (display "Replies: ")
 	  (display replies)
