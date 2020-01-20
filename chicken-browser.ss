@@ -167,6 +167,7 @@
             )
         (write-images path (cdr data))
         )
+
       )
   )
 
@@ -207,7 +208,7 @@
       (cond ((string=? input "B") (display "Threadlist:-"))
             ((string=? input "E") (exit))
             ((string=? input "Pics")
-             (
+             (begin
                 (newline)
                 (display "Enter Folder to save: ")
                 (let ((path (read-line)))
