@@ -1,4 +1,4 @@
-(import rest-bind http-client (chicken io) medea (chicken string) html-parser regex srfi-13)
+(import rest-bind http-client (chicken io) medea (chicken string) html-parser regex srfi-13 (chicken port))
 
 (define-method (threadlist board "threads.json")
   "http://a.4cdn.org"
@@ -132,6 +132,44 @@
 (define board "g")
 (define current-page 1)
 
+(define (download-to-file path data)
+  (call-with-output-file path
+    (lambda (output-port)
+      (call-with-input-request (conc "http://i.4cdn.org/" board "/" data)
+                               #f
+                               (lambda (in) (copy-port in output-port)))
+      )
+    )
+  )
+
+
+(define (read-file fname)
+  (with-input-from-file fname
+    (lambda()
+      (let loop ((count 0) (c (read-char)) (l '()))
+        (if (eof-object? c) l
+            (loop (+ count 1) (read-char) (cons c l))
+            )
+        )
+      )
+    )
+  )
+
+
+
+(define (write-images path data)
+  (if (null? data) '()
+      (let* ((tim (get-inner-content 'tim (car data))) (filename (get-inner-content 'filename (car data)))
+             (ext (get-inner-content 'ext (car data))))
+        (if (not (null? tim))
+            (download-to-file (conc path "/" (conc filename ext)) (conc (->string tim) ext))
+            '()
+            )
+        (write-images path (cdr data))
+        )
+      )
+  )
+
 (define (boardselector)
   (newline)
   (display "Select board to browse:")
@@ -167,9 +205,23 @@
     (newline)
     (let ((input (->string (read-line))))
       (cond ((string=? input "B") (display "Threadlist:-"))
-	    ((string=? input "E") (exit))
-	    )
+            ((string=? input "E") (exit))
+            ((string=? input "Pics")
+             (
+                (newline)
+                (display "Enter Folder to save: ")
+                (let ((path (read-line)))
+                  (let browse ((n 1) (dat data))
+                    (if (= n num) ;(display dat)
+                        (write-images path (get-thread board (get-inner-content 'no (car dat))))
+                        (browse (+ n 1) (cdr dat)))
+                    )
+                )
+                
+               )
+             )
       )
+    )
     )
   )
 
